@@ -1,11 +1,11 @@
 use crate::binding::BindingTable;
-use anyhow::{Result, anyhow};
+use anyhow::Result;
 use derive_more::Deref;
 use serde::Deserialize;
 use std::fs::{self, File};
 use std::io::Write;
 use std::num::{NonZeroU64, NonZeroUsize};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use std::time::Duration;
 use walkdir::WalkDir;
@@ -15,13 +15,19 @@ const DEFAULT_CONFIG: &str = include_str!("../clipboard.toml");
 
 pub static CONFIG: LazyLock<Config> = LazyLock::new(Config::load);
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub struct Config {
+  #[serde(default)]
   pub app: AppConfig,
+  #[serde(default)]
   pub output: OutputConfig,
+  #[serde(default)]
   pub cache: CacheConfig,
+  #[serde(default)]
   pub history: HistoryConfig,
+  #[serde(default)]
   pub watcher: WatcherConfig,
+  #[serde(default)]
   pub bindings: BindingTable,
 }
 
@@ -32,12 +38,15 @@ impl Config {
         .into_iter()
         .flatten()
         .find(|entry| !entry.file_type().is_dir())
-        .ok_or_else(|| anyhow!("config file not found"))?
-        .into_path();
+        .map(|entry| entry.into_path());
 
-      let contents = fs::read_to_string(&path)?;
-      let config = toml::from_str(&contents)?;
-      config
+      if let Some(path) = path {
+        let contents = fs::read_to_string(&path)?;
+        let config = toml::from_str(&contents)?;
+        config
+      } else {
+        Self::default()
+      }
     };
 
     result.unwrap()
@@ -50,7 +59,7 @@ impl Config {
   }
 }
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub struct AppConfig {
   #[serde(default)]
   poll_interval: EventPollInterval,
@@ -71,12 +80,28 @@ impl Default for EventPollInterval {
   }
 }
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub struct OutputConfig {
-  pub path: PathBuf,
+  #[serde(default)]
+  pub path: OutputPath,
 }
 
-#[derive(Deserialize)]
+#[derive(Deref, Deserialize)]
+pub struct OutputPath(PathBuf);
+
+impl AsRef<Path> for OutputPath {
+  fn as_ref(&self) -> &Path {
+    self.0.as_path()
+  }
+}
+
+impl Default for OutputPath {
+  fn default() -> Self {
+    Self(PathBuf::from("clipboard.md"))
+  }
+}
+
+#[derive(Default, Deserialize)]
 pub struct CacheConfig {
   #[serde(default)]
   pub capacity: CacheCapacity,
@@ -91,7 +116,7 @@ impl Default for CacheCapacity {
   }
 }
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub struct HistoryConfig {
   #[serde(default)]
   pub capacity: HistoryCapacity,
@@ -117,7 +142,7 @@ impl Default for HistoryWidth {
   }
 }
 
-#[derive(Deserialize)]
+#[derive(Default, Deserialize)]
 pub struct WatcherConfig {
   #[serde(default)]
   interval: WatcherInterval,
