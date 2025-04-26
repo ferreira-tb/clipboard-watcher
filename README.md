@@ -1,5 +1,9 @@
 # Clipboard Watcher
 
+```sh
+cargo +nightly install --git https://github.com/ferreira-tb/clipboard-watcher
+```
+
 |     Key     | Description            |
 | :---------: | :--------------------- |
 |     `F`     | Flush the cache.       |
