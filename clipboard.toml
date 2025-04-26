@@ -1,0 +1,27 @@
+[app]
+poll_interval = 25
+
+[output]
+path = "clipboard.md"
+
+[cache]
+capacity = 100
+
+[history]
+capacity = 45
+width = 80
+
+[watcher]
+interval = 10
+
+[[bindings]]
+key = 1
+placement = "before"
+flush = false
+content = "Bound to key 1\n\n"
+
+[[bindings]]
+key = 2
+placement = "after"
+flush = true
+content = "Bound to key 2\n\n"

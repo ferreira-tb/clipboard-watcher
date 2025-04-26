@@ -1,0 +1,15 @@
+# Editor directories and files
+.idea/*
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+
+# Rust
+debug/
+target/
+**/*.rs.bk
+*.pdb
+rustc-ice-*.txt
+
+clipboard.md
