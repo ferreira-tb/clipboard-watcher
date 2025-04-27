@@ -36,6 +36,7 @@ impl Cache {
       let mut file = OpenOptions::new()
         .append(true)
         .create(true)
+        .read(true)
         .open(path)?;
 
       file.write_all(buf.as_bytes())?;
