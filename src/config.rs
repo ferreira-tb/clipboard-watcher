@@ -8,7 +8,7 @@ use std::num::{NonZeroU64, NonZeroUsize};
 use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 use std::time::Duration;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 const FILENAME: &str = "clipboard.toml";
 const DEFAULT_CONFIG: &str = include_str!("../clipboard.toml");
@@ -38,12 +38,11 @@ impl Config {
         .into_iter()
         .flatten()
         .find(|entry| !entry.file_type().is_dir())
-        .map(|entry| entry.into_path());
+        .map(DirEntry::into_path);
 
       if let Some(path) = path {
         let contents = fs::read_to_string(&path)?;
-        let config = toml::from_str(&contents)?;
-        config
+        toml::from_str(&contents)?
       } else {
         Self::default()
       }

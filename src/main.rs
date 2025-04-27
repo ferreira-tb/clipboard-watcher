@@ -1,4 +1,4 @@
-#![feature(let_chains, string_remove_matches, try_blocks)]
+#![feature(file_buffered, let_chains, string_remove_matches, try_blocks)]
 
 mod binding;
 mod cache;
@@ -71,6 +71,9 @@ impl App {
     match event.code {
       KeyCode::Char('f') => {
         self.flush()?;
+      }
+      KeyCode::Char('l') => {
+        self.cache.update_loc();
       }
       KeyCode::Char('p') => {
         Config::write_default()?;
@@ -155,10 +158,20 @@ impl Widget for &App {
       Line::from("  OFF  ".bold().red())
     };
 
+    let loc = self.cache.estimated_loc();
+    let loc = if loc == 0 {
+      Line::from("  Empty  ".bold())
+    } else if loc == 1 {
+      Line::from("  1 line  ".bold())
+    } else {
+      Line::from(format!("  {loc} lines  ").bold())
+    };
+
     let block = Block::bordered()
       .title(title.centered())
       .title(status.right_aligned())
       .title_bottom(path.centered())
+      .title_bottom(loc.right_aligned())
       .border_set(border::THICK);
 
     List::new(self.history.values())

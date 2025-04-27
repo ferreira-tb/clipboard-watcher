@@ -1,37 +1,49 @@
 use crate::config::CONFIG;
 use crate::paragraph::{Paragraph, ParagraphPlacement};
 use anyhow::Result;
-use std::fs::OpenOptions;
-use std::io::Write;
+use std::fs::{File, OpenOptions};
+use std::io::{BufRead, Read, Write};
 
-pub struct Cache(Vec<Entry>);
+pub struct Cache {
+  entries: Vec<Entry>,
+  loc: usize,
+}
 
 impl Cache {
   pub fn new() -> Self {
     let capacity = CONFIG.cache.capacity.get();
-    Self(Vec::with_capacity(capacity))
+    Self {
+      entries: Vec::with_capacity(capacity),
+      loc: loc(),
+    }
   }
 
   pub fn write(&mut self) -> Result<()> {
-    if !self.0.is_empty() {
+    if !self.entries.is_empty() {
       let path = &CONFIG.output.path;
-      let mut text = String::with_capacity(120_000);
-      for entry in self.0.drain(..) {
+      let mut buf = String::with_capacity(150_000);
+      for entry in self.entries.drain(..) {
         match entry {
           Entry::Paragraph(paragraph) => {
-            text.push_str(&paragraph.content);
+            buf.push_str(&paragraph.content);
           }
           Entry::Raw(string) => {
-            text.push_str(string.as_ref());
+            buf.push_str(string.as_ref());
           }
         }
       }
 
-      OpenOptions::new()
+      let mut file = OpenOptions::new()
         .append(true)
         .create(true)
-        .open(path)?
-        .write_all(text.as_bytes())?;
+        .open(path)?;
+
+      file.write_all(buf.as_bytes())?;
+      file.flush()?;
+
+      buf.clear();
+      file.read_to_string(&mut buf)?;
+      self.loc = buf.lines().count();
     }
 
     Ok(())
@@ -39,7 +51,7 @@ impl Cache {
 
   fn check_capacity(&mut self) -> Result<()> {
     let capacity = CONFIG.cache.capacity.get();
-    if self.0.len() >= capacity.saturating_sub(1) {
+    if self.entries.len() >= capacity.saturating_sub(1) {
       self.write()?;
     }
 
@@ -48,7 +60,9 @@ impl Cache {
 
   pub fn raw(&mut self, text: &str) -> Result<()> {
     self.check_capacity()?;
-    self.0.push(Entry::Raw(format!("\n\n{text}")));
+    self
+      .entries
+      .push(Entry::Raw(format!("\n\n{text}")));
 
     Ok(())
   }
@@ -57,14 +71,18 @@ impl Cache {
     self.check_capacity()?;
     match paragraph.placement {
       ParagraphPlacement::After => {
-        self.0.push(Entry::Paragraph(paragraph.clone()));
+        self
+          .entries
+          .push(Entry::Paragraph(paragraph.clone()));
       }
       ParagraphPlacement::Before => {
-        let last = self.0.pop();
-        self.0.push(Entry::Paragraph(paragraph.clone()));
+        let last = self.entries.pop();
+        self
+          .entries
+          .push(Entry::Paragraph(paragraph.clone()));
 
         if let Some(last) = last {
-          self.0.push(last);
+          self.entries.push(last);
         }
       }
     }
@@ -72,13 +90,32 @@ impl Cache {
     Ok(())
   }
 
+  pub fn estimated_loc(&self) -> usize {
+    let in_cache = self.entries.len().saturating_mul(2);
+    self.loc.saturating_add(in_cache)
+  }
+
+  pub fn update_loc(&mut self) {
+    self.loc = loc();
+  }
+
   pub fn clear(&mut self) {
-    self.0.clear();
+    self.entries.clear();
   }
 
   pub fn pop(&mut self) {
-    self.0.pop();
+    self.entries.pop();
   }
+}
+
+fn loc() -> usize {
+  let loc: Result<usize> = try {
+    File::open_buffered(&CONFIG.output.path)?
+      .lines()
+      .count()
+  };
+
+  loc.unwrap_or(0)
 }
 
 enum Entry {
