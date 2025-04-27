@@ -2,7 +2,7 @@ use crate::config::CONFIG;
 use crate::paragraph::{Paragraph, ParagraphPlacement};
 use anyhow::Result;
 use std::fs::{File, OpenOptions};
-use std::io::{BufRead, Read, Write};
+use std::io::{BufRead, Write};
 
 pub struct Cache {
   entries: Vec<Entry>,
@@ -36,17 +36,14 @@ impl Cache {
       let mut file = OpenOptions::new()
         .append(true)
         .create(true)
-        .read(true)
         .open(path)?;
 
       file.write_all(buf.as_bytes())?;
       file.flush()?;
       file.sync_all()?;
-
-      buf.clear();
-      file.read_to_string(&mut buf)?;
-      self.loc = buf.lines().count();
     }
+
+    self.loc = loc();
 
     Ok(())
   }
