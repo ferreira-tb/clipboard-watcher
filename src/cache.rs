@@ -41,6 +41,7 @@ impl Cache {
 
       file.write_all(buf.as_bytes())?;
       file.flush()?;
+      file.sync_all()?;
 
       buf.clear();
       file.read_to_string(&mut buf)?;
