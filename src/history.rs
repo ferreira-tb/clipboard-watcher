@@ -113,11 +113,11 @@ impl<'a> From<&'a Entry> for ListItem<'a> {
   }
 }
 
-fn truncate(s: &str) -> &str {
-  let s = s.trim();
+fn truncate(text: &str) -> &str {
+  let text = text.trim();
   let width = CONFIG.history.width.get();
-  match s.char_indices().nth(width) {
-    Some((idx, _)) => &s[..idx],
-    None => s,
+  match text.char_indices().nth(width) {
+    Some((idx, _)) => &text[..idx],
+    None => text,
   }
 }

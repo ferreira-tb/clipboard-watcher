@@ -61,7 +61,7 @@ impl Cache {
     self.check_capacity()?;
     self
       .entries
-      .push(Entry::Raw(format!("\n\n{text}")));
+      .push(Entry::Raw(format!("\n\n{}", text.trim())));
 
     Ok(())
   }
