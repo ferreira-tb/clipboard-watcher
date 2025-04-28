@@ -2,6 +2,7 @@ use crate::binding::BindingTable;
 use anyhow::Result;
 use derive_more::Deref;
 use serde::Deserialize;
+use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::Write;
 use std::num::{NonZeroU64, NonZeroUsize};
@@ -19,6 +20,8 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(Config::load);
 pub struct Config {
   #[serde(default)]
   pub app: AppConfig,
+  #[serde(default)]
+  pub input: InputConfig,
   #[serde(default)]
   pub output: OutputConfig,
   #[serde(default)]
@@ -77,6 +80,12 @@ impl Default for EventPollInterval {
   fn default() -> Self {
     Self(unsafe { NonZeroU64::new_unchecked(25) })
   }
+}
+
+#[derive(Default, Deserialize)]
+pub struct InputConfig {
+  #[serde(default)]
+  pub replace: HashMap<String, String>,
 }
 
 #[derive(Default, Deserialize)]

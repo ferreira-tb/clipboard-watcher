@@ -1,6 +1,9 @@
 [app]
 poll_interval = 25
 
+[input]
+replace = {}
+
 [output]
 path = "clipboard.md"
 

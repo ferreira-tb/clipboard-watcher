@@ -31,7 +31,6 @@ impl Watcher {
           {
             last.clone_from(&text);
             transform(&mut text);
-
             let _ = sender.send(text);
           }
 
@@ -53,9 +52,13 @@ impl Watcher {
 }
 
 fn transform(text: &mut String) {
+  text.remove_matches(char::from(0));
+
   while text.contains('\n') {
     *text = re::LINEBREAK.replace_all(text, "").to_string();
   }
 
-  text.remove_matches(char::from(0));
+  for (key, value) in &CONFIG.input.replace {
+    *text = text.replace(key, value);
+  }
 }
