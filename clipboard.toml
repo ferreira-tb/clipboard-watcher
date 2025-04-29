@@ -2,6 +2,7 @@
 poll_interval = 25
 
 [input]
+filter = []
 regex = ['\n+\s?']
 
 [input.replace]

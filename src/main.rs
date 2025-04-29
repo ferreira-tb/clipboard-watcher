@@ -118,8 +118,10 @@ impl App {
   fn collect(&mut self) -> Result<()> {
     if self.watcher.enabled() {
       for text in self.watcher.receiver.try_iter() {
-        self.cache.raw(&text)?;
-        self.history.raw(&text);
+        if !CONFIG.input.is_filtered(&text) {
+          self.cache.raw(&text)?;
+          self.history.raw(&text);
+        }
       }
     }
 

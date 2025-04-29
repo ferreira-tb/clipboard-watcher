@@ -86,9 +86,17 @@ impl Default for EventPollInterval {
 #[derive(Default, Deserialize)]
 pub struct InputConfig {
   #[serde(default)]
+  pub filter: Vec<String>,
+  #[serde(default)]
   pub regex: Vec<Regex>,
   #[serde(default)]
   pub replace: HashMap<String, String>,
+}
+
+impl InputConfig {
+  pub fn is_filtered(&self, text: &str) -> bool {
+    self.filter.iter().any(|f| text.contains(f))
+  }
 }
 
 #[derive(Default, Deserialize)]
