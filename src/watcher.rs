@@ -1,6 +1,6 @@
 use crate::config::CONFIG;
-use crate::regex as re;
 use arboard::Clipboard;
+use std::borrow::Cow;
 use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
@@ -54,8 +54,13 @@ impl Watcher {
 fn transform(text: &mut String) {
   text.remove_matches(char::from(0));
 
-  while text.contains('\n') {
-    *text = re::LINEBREAK.replace_all(text, "").to_string();
+  for regex in &CONFIG.input.regex {
+    while regex.is_match(text) {
+      let cow = regex.replace_all(text, "");
+      if let Cow::Owned(inner) = cow {
+        *text = inner;
+      }
+    }
   }
 
   for (key, value) in &CONFIG.input.replace {

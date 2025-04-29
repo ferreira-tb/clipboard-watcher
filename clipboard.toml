@@ -2,7 +2,9 @@
 poll_interval = 25
 
 [input]
-replace = {}
+regex = ['\n+\s?']
+
+[input.replace]
 
 [output]
 path = "clipboard.md"

@@ -1,4 +1,5 @@
 use crate::binding::BindingTable;
+use crate::regex::Regex;
 use anyhow::Result;
 use derive_more::Deref;
 use serde::Deserialize;
@@ -84,6 +85,8 @@ impl Default for EventPollInterval {
 
 #[derive(Default, Deserialize)]
 pub struct InputConfig {
+  #[serde(default)]
+  pub regex: Vec<Regex>,
   #[serde(default)]
   pub replace: HashMap<String, String>,
 }
