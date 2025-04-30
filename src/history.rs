@@ -1,6 +1,5 @@
 use crate::config::CONFIG;
 use crate::paragraph::{Paragraph, ParagraphPlacement};
-use parking_lot::Mutex;
 use ratatui::style::Stylize;
 use ratatui::text::Text;
 use ratatui::widgets::ListItem;
@@ -9,7 +8,7 @@ use std::num::NonZeroU32;
 
 pub struct History {
   queue: VecDeque<Entry>,
-  current: Mutex<NonZeroU32>,
+  current: NonZeroU32,
 }
 
 impl History {
@@ -17,7 +16,7 @@ impl History {
     let capacity = CONFIG.history.capacity.get();
     History {
       queue: VecDeque::with_capacity(capacity),
-      current: Mutex::new(NonZeroU32::MIN),
+      current: NonZeroU32::MIN,
     }
   }
 
@@ -30,11 +29,10 @@ impl History {
 
   pub fn raw(&mut self, text: &str) {
     self.check_capacity();
-    let mut current = self.current.lock();
-    *current = current.saturating_add(1);
+    self.current = self.current.saturating_add(1);
     self
       .queue
-      .push_back(Entry::raw(*current, truncate(text)));
+      .push_back(Entry::raw(self.current, truncate(text)));
   }
 
   pub fn paragraph(&mut self, paragraph: &Paragraph) {
@@ -68,17 +66,16 @@ impl History {
 
   pub fn clear(&mut self) {
     self.queue.clear();
-    *self.current.lock() = NonZeroU32::MIN;
+    self.current = NonZeroU32::MIN;
   }
 
   pub fn pop(&mut self) -> Option<Entry> {
     self.queue.pop_back().inspect(|entry| {
       if matches!(entry, Entry::Raw(_, _)) {
-        let mut current = self.current.lock();
-        if *current > NonZeroU32::MIN {
+        if self.current > NonZeroU32::MIN {
           unsafe {
-            let n = current.get().unchecked_sub(1);
-            *current = NonZeroU32::new_unchecked(n);
+            let n = self.current.get().unchecked_sub(1);
+            self.current = NonZeroU32::new_unchecked(n);
           }
         }
       }
