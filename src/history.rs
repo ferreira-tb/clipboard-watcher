@@ -29,10 +29,11 @@ impl History {
 
   pub fn raw(&mut self, text: &str) {
     self.check_capacity();
-    self.current = self.current.saturating_add(1);
     self
       .queue
       .push_back(Entry::raw(self.current, truncate(text)));
+
+    self.current = self.current.saturating_add(1);
   }
 
   pub fn paragraph(&mut self, paragraph: &Paragraph) {
