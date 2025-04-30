@@ -29,4 +29,5 @@ pub enum ParagraphPlacement {
   #[default]
   After,
   Before,
+  Replace,
 }

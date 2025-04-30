@@ -67,20 +67,24 @@ impl Cache {
   }
 
   pub fn paragraph(&mut self, paragraph: &Paragraph) -> Result<()> {
+    use ParagraphPlacement::*;
+
     self.check_capacity()?;
     match paragraph.placement {
-      ParagraphPlacement::After => {
+      After => {
         self
           .entries
           .push(Entry::Paragraph(paragraph.clone()));
       }
-      ParagraphPlacement::Before => {
+      Before | Replace => {
         let last = self.entries.pop();
         self
           .entries
           .push(Entry::Paragraph(paragraph.clone()));
 
-        if let Some(last) = last {
+        if let Some(last) = last
+          && let Before = paragraph.placement
+        {
           self.entries.push(last);
         }
       }
