@@ -1,4 +1,5 @@
 [app]
+max_loc = 2000
 poll_interval = 25
 
 [input]

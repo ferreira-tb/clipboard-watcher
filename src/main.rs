@@ -161,7 +161,7 @@ impl Widget for &App {
     };
 
     let loc = self.cache.estimated_loc();
-    let loc = if loc == 0 {
+    let loc_line = if loc == 0 {
       Line::from("  Empty  ".bold())
     } else if loc == 1 {
       Line::from("  1 line  ".bold())
@@ -169,12 +169,17 @@ impl Widget for &App {
       Line::from(format!("  {loc} lines  ").bold())
     };
 
-    let block = Block::bordered()
+    let mut block = Block::bordered()
       .title(title.centered())
       .title(status.right_aligned())
       .title_bottom(path.centered())
-      .title_bottom(loc.right_aligned())
+      .title_bottom(loc_line.right_aligned())
       .border_set(border::THICK);
+
+    if loc > CONFIG.app.max_loc() {
+      let line = Line::from("  MAX LOC EXCEEDED ".red().bold());
+      block = block.title_bottom(line.left_aligned());
+    }
 
     List::new(self.history.values())
       .block(block)

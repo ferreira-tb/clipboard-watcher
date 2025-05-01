@@ -65,12 +65,27 @@ impl Config {
 #[derive(Default, Deserialize)]
 pub struct AppConfig {
   #[serde(default)]
+  max_loc: MaxLoc,
+  #[serde(default)]
   poll_interval: EventPollInterval,
 }
 
 impl AppConfig {
-  pub fn poll_interval(&self) -> Duration {
-    Duration::from_millis(self.poll_interval.get())
+  pub const fn max_loc(&self) -> usize {
+    self.max_loc.0.get()
+  }
+
+  pub const fn poll_interval(&self) -> Duration {
+    Duration::from_millis(self.poll_interval.0.get())
+  }
+}
+
+#[derive(Clone, Copy, Deref, Deserialize)]
+pub struct MaxLoc(NonZeroUsize);
+
+impl Default for MaxLoc {
+  fn default() -> Self {
+    Self(unsafe { NonZeroUsize::new_unchecked(2000) })
   }
 }
 
@@ -168,8 +183,8 @@ pub struct WatcherConfig {
 }
 
 impl WatcherConfig {
-  pub fn interval(&self) -> Duration {
-    Duration::from_millis(self.interval.get())
+  pub const fn interval(&self) -> Duration {
+    Duration::from_millis(self.interval.0.get())
   }
 }
 
