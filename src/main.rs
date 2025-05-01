@@ -155,18 +155,18 @@ impl Widget for &App {
     let path = Line::from(format!(" {} ", CONFIG.output.path.display()));
 
     let status = if self.watcher.enabled() {
-      Line::from("  ON  ".bold().green())
+      Line::from(" ON ".bold().green())
     } else {
-      Line::from("  OFF  ".bold().red())
+      Line::from(" OFF ".bold().red())
     };
 
     let loc = self.cache.estimated_loc();
     let loc_line = if loc == 0 {
-      Line::from("  Empty  ".bold())
+      Line::from(" Empty ".bold())
     } else if loc == 1 {
-      Line::from("  1 line  ".bold())
+      Line::from(" 1 line ".bold())
     } else {
-      Line::from(format!("  {loc} lines  ").bold())
+      Line::from(format!(" {loc} lines ").bold())
     };
 
     let mut block = Block::bordered()
@@ -177,7 +177,7 @@ impl Widget for &App {
       .border_set(border::THICK);
 
     if loc > CONFIG.app.max_loc() {
-      let line = Line::from("  MAX LOC EXCEEDED ".red().bold());
+      let line = Line::from(" MAX LOC EXCEEDED ".red().bold());
       block = block.title_bottom(line.left_aligned());
     }
 
