@@ -72,12 +72,10 @@ impl History {
 
   pub fn pop(&mut self) -> Option<Entry> {
     self.queue.pop_back().inspect(|entry| {
-      if matches!(entry, Entry::Raw(_, _)) {
-        if self.current > NonZeroU32::MIN {
-          unsafe {
-            let n = self.current.get().unchecked_sub(1);
-            self.current = NonZeroU32::new_unchecked(n);
-          }
+      if matches!(entry, Entry::Raw(_, _)) && self.current > NonZeroU32::MIN {
+        unsafe {
+          let n = self.current.get().unchecked_sub(1);
+          self.current = NonZeroU32::new_unchecked(n);
         }
       }
     })
