@@ -59,10 +59,8 @@ impl Cache {
 
   pub fn raw(&mut self, text: &str) -> Result<()> {
     self.check_capacity()?;
-    self
-      .entries
-      .push(Entry::Raw(format!("\n\n{}", text.trim())));
-
+    let text = format!("\n\n{}", text.trim());
+    self.entries.push(Entry::Raw(text));
     Ok(())
   }
 
