@@ -11,7 +11,7 @@ pub struct Cache {
 
 impl Cache {
   pub fn new() -> Self {
-    let capacity = CONFIG.cache.capacity.get();
+    let capacity = CONFIG.cache_capacity();
     Self {
       entries: Vec::with_capacity(capacity),
       loc: loc(),
@@ -20,7 +20,7 @@ impl Cache {
 
   pub fn write(&mut self) -> Result<()> {
     if !self.entries.is_empty() {
-      let path = &CONFIG.output.path;
+      let path = CONFIG.path();
       let mut buf = String::with_capacity(150_000);
       for entry in self.entries.drain(..) {
         match entry {
@@ -49,7 +49,7 @@ impl Cache {
   }
 
   fn check_capacity(&mut self) -> Result<()> {
-    let capacity = CONFIG.cache.capacity.get();
+    let capacity = CONFIG.cache_capacity();
     if self.entries.len() >= capacity.saturating_sub(1) {
       self.write()?;
     }
@@ -111,7 +111,7 @@ impl Cache {
 
 fn loc() -> usize {
   let loc: Result<usize> = try {
-    File::open_buffered(&CONFIG.output.path)?
+    File::open_buffered(CONFIG.path())?
       .lines()
       .count()
   };

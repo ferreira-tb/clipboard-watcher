@@ -34,7 +34,7 @@ impl Watcher {
             let _ = sender.send(text);
           }
 
-          sleep(CONFIG.watcher.interval());
+          sleep(CONFIG.watcher_interval());
         }
       }
     });
@@ -54,16 +54,16 @@ impl Watcher {
 fn transform(text: &mut String) {
   text.remove_matches(char::from(0));
 
-  for regex in &CONFIG.input.regex {
+  for regex in &CONFIG.regex {
     while regex.is_match(text) {
-      let cow = regex.replace_all(text, "");
+      let cow = regex.replace_all(text);
       if let Cow::Owned(inner) = cow {
         *text = inner;
       }
     }
   }
 
-  for (key, value) in &CONFIG.input.replace {
+  for (key, value) in &CONFIG.replace {
     *text = text.replace(key, value);
   }
 }

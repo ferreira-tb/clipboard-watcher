@@ -13,7 +13,7 @@ pub struct History {
 
 impl History {
   pub fn new() -> Self {
-    let capacity = CONFIG.history.capacity.get();
+    let capacity = CONFIG.history_capacity();
     History {
       queue: VecDeque::with_capacity(capacity),
       current: NonZeroU32::MIN,
@@ -21,7 +21,7 @@ impl History {
   }
 
   fn check_capacity(&mut self) {
-    let capacity = CONFIG.history.capacity.get();
+    let capacity = CONFIG.history_capacity();
     while self.queue.len() >= capacity {
       self.queue.pop_front();
     }
@@ -104,7 +104,7 @@ impl<'a> From<&'a Entry> for ListItem<'a> {
         let text = if let Some(display) = paragraph.display.as_deref() {
           Text::from(truncate(display))
         } else {
-          let width = CONFIG.history.width.get();
+          let width = CONFIG.history_width();
           let span = "-".repeat(width).bold().light_blue();
           Text::from(span)
         };
@@ -131,7 +131,7 @@ impl<'a> From<&'a Entry> for ListItem<'a> {
 
 fn truncate(text: &str) -> &str {
   let text = text.trim();
-  let width = CONFIG.history.width.get();
+  let width = CONFIG.history_width();
   match text.char_indices().nth(width) {
     Some((idx, _)) => &text[..idx],
     None => text,

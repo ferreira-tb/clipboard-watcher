@@ -20,19 +20,28 @@ pub static CONFIG: LazyLock<Config> = LazyLock::new(Config::load);
 #[derive(Default, Deserialize)]
 pub struct Config {
   #[serde(default)]
-  pub app: AppConfig,
+  pub path: OutputPath,
   #[serde(default)]
-  pub input: InputConfig,
+  pub max_loc: MaxLoc,
   #[serde(default)]
-  pub output: OutputConfig,
+  pub poll_interval: EventPollInterval,
   #[serde(default)]
-  pub cache: CacheConfig,
+  pub cache_capacity: CacheCapacity,
   #[serde(default)]
-  pub history: HistoryConfig,
+  pub history_capacity: HistoryCapacity,
   #[serde(default)]
-  pub watcher: WatcherConfig,
+  pub history_width: HistoryWidth,
+  #[serde(default)]
+  pub watcher_interval: WatcherInterval,
   #[serde(default)]
   pub bindings: BindingTable,
+
+  #[serde(default)]
+  pub filter: Vec<String>,
+  #[serde(default)]
+  pub replace: HashMap<String, String>,
+  #[serde(default)]
+  pub regex: Vec<Regex>,
 }
 
 impl Config {
@@ -60,23 +69,37 @@ impl Config {
     file.write_all(DEFAULT_CONFIG.as_bytes())?;
     Ok(())
   }
-}
 
-#[derive(Default, Deserialize)]
-pub struct AppConfig {
-  #[serde(default)]
-  max_loc: MaxLoc,
-  #[serde(default)]
-  poll_interval: EventPollInterval,
-}
+  pub fn path(&self) -> &Path {
+    &self.path.0
+  }
 
-impl AppConfig {
   pub const fn max_loc(&self) -> usize {
     self.max_loc.0.get()
   }
 
   pub const fn poll_interval(&self) -> Duration {
     Duration::from_millis(self.poll_interval.0.get())
+  }
+
+  pub const fn cache_capacity(&self) -> usize {
+    self.cache_capacity.0.get()
+  }
+
+  pub const fn history_capacity(&self) -> usize {
+    self.history_capacity.0.get()
+  }
+
+  pub const fn history_width(&self) -> usize {
+    self.history_width.0.get()
+  }
+
+  pub const fn watcher_interval(&self) -> Duration {
+    Duration::from_millis(self.watcher_interval.0.get())
+  }
+
+  pub fn is_filtered(&self, text: &str) -> bool {
+    self.filter.iter().any(|f| text.contains(f))
   }
 }
 
@@ -85,7 +108,7 @@ pub struct MaxLoc(NonZeroUsize);
 
 impl Default for MaxLoc {
   fn default() -> Self {
-    Self(unsafe { NonZeroUsize::new_unchecked(2000) })
+    Self(unsafe { NonZeroUsize::new_unchecked(1500) })
   }
 }
 
@@ -96,28 +119,6 @@ impl Default for EventPollInterval {
   fn default() -> Self {
     Self(unsafe { NonZeroU64::new_unchecked(25) })
   }
-}
-
-#[derive(Default, Deserialize)]
-pub struct InputConfig {
-  #[serde(default)]
-  pub filter: Vec<String>,
-  #[serde(default)]
-  pub regex: Vec<Regex>,
-  #[serde(default)]
-  pub replace: HashMap<String, String>,
-}
-
-impl InputConfig {
-  pub fn is_filtered(&self, text: &str) -> bool {
-    self.filter.iter().any(|f| text.contains(f))
-  }
-}
-
-#[derive(Default, Deserialize)]
-pub struct OutputConfig {
-  #[serde(default)]
-  pub path: OutputPath,
 }
 
 #[derive(Deref, Deserialize)]
@@ -135,12 +136,6 @@ impl Default for OutputPath {
   }
 }
 
-#[derive(Default, Deserialize)]
-pub struct CacheConfig {
-  #[serde(default)]
-  pub capacity: CacheCapacity,
-}
-
 #[derive(Clone, Copy, Deref, Deserialize)]
 pub struct CacheCapacity(NonZeroUsize);
 
@@ -148,14 +143,6 @@ impl Default for CacheCapacity {
   fn default() -> Self {
     Self(unsafe { NonZeroUsize::new_unchecked(100) })
   }
-}
-
-#[derive(Default, Deserialize)]
-pub struct HistoryConfig {
-  #[serde(default)]
-  pub capacity: HistoryCapacity,
-  #[serde(default)]
-  pub width: HistoryWidth,
 }
 
 #[derive(Clone, Copy, Deref, Deserialize)]
@@ -173,18 +160,6 @@ pub struct HistoryWidth(NonZeroUsize);
 impl Default for HistoryWidth {
   fn default() -> Self {
     Self(unsafe { NonZeroUsize::new_unchecked(80) })
-  }
-}
-
-#[derive(Default, Deserialize)]
-pub struct WatcherConfig {
-  #[serde(default)]
-  interval: WatcherInterval,
-}
-
-impl WatcherConfig {
-  pub const fn interval(&self) -> Duration {
-    Duration::from_millis(self.interval.0.get())
   }
 }
 

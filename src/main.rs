@@ -52,7 +52,7 @@ impl App {
       self.collect()?;
       terminal.draw(|frame| self.draw(frame))?;
 
-      if event::poll(CONFIG.app.poll_interval())?
+      if event::poll(CONFIG.poll_interval())?
         && let Event::Key(event) = event::read()?
         && event.kind == KeyEventKind::Press
       {
@@ -118,7 +118,7 @@ impl App {
   fn collect(&mut self) -> Result<()> {
     if self.watcher.enabled() {
       for text in self.watcher.receiver.try_iter() {
-        if !CONFIG.input.is_filtered(&text) {
+        if !CONFIG.is_filtered(&text) {
           self.cache.raw(&text)?;
           self.history.raw(&text);
         }
@@ -152,7 +152,7 @@ impl App {
 impl Widget for &App {
   fn render(self, area: Rect, buf: &mut Buffer) {
     let title = Line::from(" Clipboard Watcher ".bold());
-    let path = Line::from(format!(" {} ", CONFIG.output.path.display()));
+    let path = Line::from(format!(" {} ", CONFIG.path().display()));
 
     let status = if self.watcher.enabled() {
       Line::from(" ON ".bold().green())
@@ -176,7 +176,7 @@ impl Widget for &App {
       .title_bottom(loc_line.right_aligned())
       .border_set(border::THICK);
 
-    if loc > CONFIG.app.max_loc() {
+    if loc > CONFIG.max_loc() {
       let line = Line::from(" MAX LOC EXCEEDED ".red().bold());
       block = block.title_bottom(line.left_aligned());
     }

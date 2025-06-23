@@ -1,25 +1,15 @@
-[app]
+path = "clipboard.md"
 max_loc = 2000
 poll_interval = 25
-
-[input]
+cache_capacity = 100
+history_capacity = 45
+history_width = 80
+watcher_interval = 10
 filter = []
-regex = ['\n+\s?']
 
-[input.replace]
-
-[output]
-path = "clipboard.md"
-
-[cache]
-capacity = 100
-
-[history]
-capacity = 45
-width = 80
-
-[watcher]
-interval = 10
+[[regex]]
+pattern = '\n+\s?'
+rep = ""
 
 [[bindings]]
 key = 1
