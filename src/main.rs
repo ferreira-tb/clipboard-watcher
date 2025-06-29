@@ -1,4 +1,4 @@
-#![feature(file_buffered, let_chains, string_remove_matches, try_blocks)]
+#![feature(file_buffered, string_remove_matches, try_blocks)]
 
 mod binding;
 mod cache;
@@ -177,7 +177,7 @@ impl Widget for &App {
       .border_set(border::THICK);
 
     if loc > CONFIG.max_loc() {
-      let line = Line::from(" MAX LOC EXCEEDED ".red().bold());
+      let line = Line::from(" MAX LOC ".red().bold());
       block = block.title_bottom(line.left_aligned());
     }
 
