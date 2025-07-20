@@ -113,7 +113,7 @@ impl<'a> From<&'a Entry> for ListItem<'a> {
       }
       Entry::Raw(id, content) => {
         let mut span = format!("({id})").bold();
-        if id.get() % 2 == 0 {
+        if id.get().is_multiple_of(2) {
           span = span.magenta();
         } else {
           span = span.yellow();
