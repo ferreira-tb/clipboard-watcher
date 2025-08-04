@@ -155,9 +155,9 @@ impl Widget for &App {
     let path = Line::from(format!(" {} ", CONFIG.path().display()));
 
     let status = if self.watcher.enabled() {
-      Line::from("  ON  ".bold().green())
+      Line::from(" ON ".bold().green())
     } else {
-      Line::from("  OFF  ".bold().red())
+      Line::from(" OFF ".bold().red())
     };
 
     let cache_len = self.cache.len();
