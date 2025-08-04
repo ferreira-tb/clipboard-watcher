@@ -155,10 +155,14 @@ impl Widget for &App {
     let path = Line::from(format!(" {} ", CONFIG.path().display()));
 
     let status = if self.watcher.enabled() {
-      Line::from(" ON ".bold().green())
+      Line::from("  ON  ".bold().green())
     } else {
-      Line::from(" OFF ".bold().red())
+      Line::from("  OFF  ".bold().red())
     };
+
+    let cache_len = self.cache.len();
+    let cache_cap = CONFIG.cache_capacity();
+    let cache = Line::from(format!(" Cache: {cache_len} / {cache_cap} ").bold());
 
     let loc = self.cache.estimated_loc();
     let loc_line = if loc == 0 {
@@ -172,15 +176,10 @@ impl Widget for &App {
     let mut block = Block::bordered()
       .title(title.centered())
       .title(status.left_aligned())
+      .title(cache.right_aligned())
       .title_bottom(path.centered())
       .title_bottom(loc_line.right_aligned())
       .border_set(border::THICK);
-
-    if !self.cache.is_empty() {
-      let len = self.cache.len();
-      let line = Line::from(format!(" In cache: {len} ").bold());
-      block = block.title(line.right_aligned());
-    }
 
     if loc > CONFIG.max_loc() {
       let line = Line::from(" MAX LOC ".red().bold());
