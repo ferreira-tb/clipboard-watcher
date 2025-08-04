@@ -107,6 +107,14 @@ impl Cache {
   pub fn pop(&mut self) {
     self.entries.pop();
   }
+
+  pub fn len(&self) -> usize {
+    self.entries.len()
+  }
+
+  pub fn is_empty(&self) -> bool {
+    self.entries.is_empty()
+  }
 }
 
 fn loc() -> usize {

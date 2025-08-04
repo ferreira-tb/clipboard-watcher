@@ -171,10 +171,16 @@ impl Widget for &App {
 
     let mut block = Block::bordered()
       .title(title.centered())
-      .title(status.right_aligned())
+      .title(status.left_aligned())
       .title_bottom(path.centered())
       .title_bottom(loc_line.right_aligned())
       .border_set(border::THICK);
+
+    if !self.cache.is_empty() {
+      let len = self.cache.len();
+      let line = Line::from(format!(" In cache: {len} ").bold());
+      block = block.title(line.right_aligned());
+    }
 
     if loc > CONFIG.max_loc() {
       let line = Line::from(" MAX LOC ".red().bold());
