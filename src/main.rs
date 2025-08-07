@@ -189,11 +189,8 @@ fn loc_line(app: &App) -> Line<'_> {
   let max = CONFIG.max_loc();
   let loc = format!(" {curr} / {max} ");
 
-  let diff = max.saturating_sub(curr);
-  if diff == 0 {
+  if curr >= max {
     Line::from(loc.bold().red())
-  } else if (1..=(max.div_ceil(10))).contains(&diff) {
-    Line::from(loc.light_red())
   } else {
     Line::from(loc.bold())
   }
