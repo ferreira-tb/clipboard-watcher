@@ -192,8 +192,8 @@ fn loc_line(app: &App) -> Line<'_> {
   let diff = max.saturating_sub(curr);
   if diff == 0 {
     Line::from(loc.bold().red())
-  } else if (1..=100).contains(&diff) {
-    Line::from(loc.bold().light_red())
+  } else if (1..=(max.div_ceil(10))).contains(&diff) {
+    Line::from(loc.light_red())
   } else {
     Line::from(loc.bold())
   }
