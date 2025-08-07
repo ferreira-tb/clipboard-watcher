@@ -154,42 +154,47 @@ impl Widget for &App {
     let title = Line::from(" Clipboard Watcher ".bold());
     let path = Line::from(format!(" {} ", CONFIG.path().display()));
 
-    let status = if self.watcher.enabled() {
-      Line::from(" ON ".bold().green())
-    } else {
-      Line::from(" OFF ".bold().red())
-    };
-
-    let cache_len = self.cache.len();
-    let cache_cap = CONFIG.cache_capacity();
-    let cache = Line::from(format!(" Cache: {cache_len} / {cache_cap} ").bold());
-
-    let loc = self.cache.estimated_loc();
-    let loc_line = if loc == 0 {
-      Line::from(" Empty ".bold())
-    } else if loc == 1 {
-      Line::from(" 1 line ".bold())
-    } else {
-      Line::from(format!(" {loc} lines ").bold())
-    };
-
-    let mut block = Block::bordered()
+    let block = Block::bordered()
       .title(title.centered())
-      .title(status.left_aligned())
-      .title(cache.right_aligned())
+      .title(status_line(self).left_aligned())
+      .title(cache_line(self).right_aligned())
       .title_bottom(path.centered())
-      .title_bottom(loc_line.right_aligned())
+      .title_bottom(loc_line(self).left_aligned())
       .border_set(border::THICK);
-
-    if loc > CONFIG.max_loc() {
-      let line = Line::from(" MAX LOC ".red().bold());
-      block = block.title_bottom(line.left_aligned());
-    }
 
     List::new(self.history.values())
       .block(block)
       .direction(ListDirection::TopToBottom)
       .scroll_padding(3)
       .render(area, buf);
+  }
+}
+
+fn status_line(app: &App) -> Line<'_> {
+  if app.watcher.enabled() {
+    Line::from(" ON ".bold().green())
+  } else {
+    Line::from(" OFF ".bold().red())
+  }
+}
+
+fn cache_line(app: &App) -> Line<'_> {
+  let len = app.cache.len();
+  let cap = CONFIG.cache_capacity();
+  Line::from(format!(" Cache: {len} / {cap} ").bold())
+}
+
+fn loc_line(app: &App) -> Line<'_> {
+  let curr = app.cache.estimated_loc();
+  let max = CONFIG.max_loc();
+  let loc = format!(" {curr} / {max} ");
+
+  let diff = max.saturating_sub(curr);
+  if diff == 0 {
+    Line::from(loc.bold().red())
+  } else if (1..=100).contains(&diff) {
+    Line::from(loc.bold().light_red())
+  } else {
+    Line::from(loc.bold())
   }
 }
