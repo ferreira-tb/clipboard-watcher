@@ -1,6 +1,6 @@
 [package]
 name = "clipboard-watcher"
-version = "2.2.4"
+version = "2.3.0"
 homepage = "https://github.com/ferreira-tb/clipboard-watcher"
 repository = "https://github.com/ferreira-tb/clipboard-watcher"
 authors = ["Andrew Ferreira <andrew.shien2@gmail.com>"]
@@ -19,6 +19,7 @@ panic = "abort"
 [dependencies]
 anyhow = "1.0"
 arboard = "3.6"
+bon = "3.7"
 crossterm = "0.29"
 ratatui = "0.29"
 regex = "1.11"

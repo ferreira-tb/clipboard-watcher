@@ -70,8 +70,9 @@ impl App {
   fn on_key(&mut self, event: KeyEvent) -> Result<()> {
     match event.code {
       KeyCode::Char('f') => {
-        self.flush()?;
+        flush(self).call()?;
       }
+
       KeyCode::Char('l') => {
         self.cache.update_loc();
       }
@@ -79,8 +80,11 @@ impl App {
         Config::write_default()?;
       }
       KeyCode::Char('q') => {
-        self.flush()?;
+        flush(self).call()?;
         self.exit();
+      }
+      KeyCode::Char('w') => {
+        flush(self).keep_history(true).call()?;
       }
       KeyCode::Char('x') => {
         self.exit();
@@ -93,7 +97,7 @@ impl App {
           self.cache.paragraph(paragraph)?;
           self.history.paragraph(paragraph);
           if paragraph.flush {
-            self.flush()?;
+            flush(self).call()?;
           }
         }
       }
@@ -132,15 +136,9 @@ impl App {
     self.exit = true;
   }
 
-  fn flush(&mut self) -> Result<()> {
-    self.cache.write()?;
-    self.history.clear();
-    Ok(())
-  }
-
   fn toggle(&mut self) -> Result<()> {
     if self.watcher.enabled() {
-      self.flush()?;
+      flush(self).call()?;
     }
 
     self.watcher.toggle();
@@ -170,6 +168,17 @@ impl Widget for &App {
   }
 }
 
+#[bon::builder]
+fn flush(#[builder(start_fn)] app: &mut App, #[builder(default)] keep_history: bool) -> Result<()> {
+  app.cache.write()?;
+
+  if !keep_history {
+    app.history.clear();
+  }
+
+  Ok(())
+}
+
 fn status_line(app: &App) -> Line<'_> {
   if app.watcher.enabled() {
     Line::from(" ON ".bold().green())
@@ -189,9 +198,5 @@ fn loc_line(app: &App) -> Line<'_> {
   let max = CONFIG.max_loc();
   let loc = format!(" {curr} / {max} ");
 
-  if curr >= max {
-    Line::from(loc.bold().red())
-  } else {
-    Line::from(loc.bold())
-  }
+  if curr >= max { Line::from(loc.bold().red()) } else { Line::from(loc.bold()) }
 }
