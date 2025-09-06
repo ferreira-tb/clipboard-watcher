@@ -5,6 +5,7 @@ use ratatui::text::Text;
 use ratatui::widgets::ListItem;
 use std::collections::VecDeque;
 use std::num::NonZeroU32;
+use std::sync::Arc;
 
 pub struct History {
   queue: VecDeque<Entry>,
@@ -32,6 +33,15 @@ impl History {
     self
       .queue
       .push_back(Entry::raw(self.current, truncate(text)));
+
+    for pattern in &CONFIG.invalid_patterns {
+      if text.contains(pattern.as_ref()) {
+        let pattern = Arc::clone(pattern);
+        self
+          .queue
+          .push_back(Entry::InvalidPattern(pattern));
+      }
+    }
 
     self.current = self.current.saturating_add(1);
   }
@@ -89,6 +99,7 @@ impl History {
 pub enum Entry {
   Paragraph(Paragraph),
   Raw(NonZeroU32, String),
+  InvalidPattern(Arc<str>),
 }
 
 impl Entry {
@@ -124,6 +135,10 @@ impl<'a> From<&'a Entry> for ListItem<'a> {
         text.push_span(content.as_str());
 
         ListItem::new(text)
+      }
+      Entry::InvalidPattern(pattern) => {
+        let span = format!("INVALID PATTERN: {pattern}");
+        ListItem::new(Text::from(span.bold().light_red()))
       }
     }
   }

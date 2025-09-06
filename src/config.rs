@@ -8,7 +8,7 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::num::{NonZeroU64, NonZeroUsize};
 use std::path::{Path, PathBuf};
-use std::sync::LazyLock;
+use std::sync::{Arc, LazyLock};
 use std::time::Duration;
 use walkdir::{DirEntry, WalkDir};
 
@@ -37,7 +37,9 @@ pub struct Config {
   pub bindings: BindingTable,
 
   #[serde(default)]
-  pub filter: Vec<String>,
+  pub filter: Vec<Arc<str>>,
+  #[serde(default)]
+  pub invalid_patterns: Vec<Arc<str>>,
   #[serde(default)]
   pub replace: HashMap<String, String>,
   #[serde(default)]
@@ -99,7 +101,10 @@ impl Config {
   }
 
   pub fn is_filtered(&self, text: &str) -> bool {
-    self.filter.iter().any(|f| text.contains(f))
+    self
+      .filter
+      .iter()
+      .any(|f| text.contains(f.as_ref()))
   }
 }
 

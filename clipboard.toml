@@ -6,6 +6,7 @@ history_capacity = 45
 history_width = 80
 watcher_interval = 10
 filter = []
+invalid_patterns = []
 
 [[regex]]
 pattern = '\n+\s?'

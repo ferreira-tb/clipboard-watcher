@@ -84,7 +84,7 @@ impl App {
         self.exit();
       }
       KeyCode::Char('w') => {
-        flush(self).keep_history(true).call()?;
+        flush(self).clear_history(false).call()?;
       }
       KeyCode::Char('x') => {
         self.exit();
@@ -169,10 +169,13 @@ impl Widget for &App {
 }
 
 #[bon::builder]
-fn flush(#[builder(start_fn)] app: &mut App, #[builder(default)] keep_history: bool) -> Result<()> {
+fn flush(
+  #[builder(start_fn)] app: &mut App,
+  #[builder(default = true)] clear_history: bool,
+) -> Result<()> {
   app.cache.write()?;
 
-  if !keep_history {
+  if clear_history {
     app.history.clear();
   }
 
