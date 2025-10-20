@@ -110,9 +110,6 @@ impl App {
         self.cache.clear();
         self.history.clear();
       }
-      KeyCode::Enter => {
-        self.toggle()?;
-      }
       _ => {}
     }
 
@@ -120,12 +117,10 @@ impl App {
   }
 
   fn collect(&mut self) -> Result<()> {
-    if self.watcher.enabled() {
-      for text in self.watcher.receiver.try_iter() {
-        if !CONFIG.is_filtered(&text) {
-          self.cache.raw(&text)?;
-          self.history.raw(&text);
-        }
+    for text in self.watcher.receiver.try_iter() {
+      if !CONFIG.is_filtered(&text) {
+        self.cache.raw(&text)?;
+        self.history.raw(&text);
       }
     }
 
@@ -134,16 +129,6 @@ impl App {
 
   fn exit(&mut self) {
     self.exit = true;
-  }
-
-  fn toggle(&mut self) -> Result<()> {
-    if self.watcher.enabled() {
-      flush(self).call()?;
-    }
-
-    self.watcher.toggle();
-
-    Ok(())
   }
 }
 
@@ -154,7 +139,6 @@ impl Widget for &App {
 
     let block = Block::bordered()
       .title(title.centered())
-      .title(status_line(self).left_aligned())
       .title(cache_line(self).right_aligned())
       .title_bottom(path.centered())
       .title_bottom(loc_line(self).left_aligned())
@@ -180,14 +164,6 @@ fn flush(
   }
 
   Ok(())
-}
-
-fn status_line(app: &App) -> Line<'_> {
-  if app.watcher.enabled() {
-    Line::from(" ON ".bold().green())
-  } else {
-    Line::from(" OFF ".bold().red())
-  }
 }
 
 fn cache_line(app: &App) -> Line<'_> {
