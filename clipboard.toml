@@ -1,5 +1,5 @@
 path = "clipboard.md"
-max_loc = 2000
+max_loc = 1500
 poll_interval = 25
 cache_capacity = 100
 history_capacity = 45
