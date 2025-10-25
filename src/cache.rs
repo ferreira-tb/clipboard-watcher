@@ -96,7 +96,7 @@ impl Cache {
       .entries
       .len()
       .saturating_mul(2)
-      .saturating_add(1);
+      .saturating_sub(1);
 
     self.loc.saturating_add(in_cache)
   }
