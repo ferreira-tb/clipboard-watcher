@@ -43,7 +43,7 @@ impl Cache {
       file.sync_all()?;
     }
 
-    self.loc = loc();
+    self.update_loc();
 
     Ok(())
   }
@@ -92,12 +92,7 @@ impl Cache {
   }
 
   pub fn estimated_loc(&self) -> usize {
-    let in_cache = self
-      .entries
-      .len()
-      .saturating_mul(2)
-      .saturating_sub(1);
-
+    let in_cache = self.entries.len().saturating_mul(2);
     self.loc.saturating_add(in_cache)
   }
 
