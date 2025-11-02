@@ -93,7 +93,13 @@ impl Cache {
 
   pub fn estimated_loc(&self) -> usize {
     let in_cache = self.entries.len().saturating_mul(2);
-    self.loc.saturating_add(in_cache)
+    let mut loc = self.loc.saturating_add(in_cache);
+
+    if loc.is_multiple_of(2) {
+      loc = loc.saturating_add(1);
+    }
+
+    loc
   }
 
   pub fn update_loc(&mut self) {

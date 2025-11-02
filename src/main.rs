@@ -98,8 +98,6 @@ impl App {
           self.history.paragraph(paragraph);
           if paragraph.flush {
             flush(self).call()?;
-          } else {
-            self.cache.update_loc();
           }
         }
       }
@@ -111,7 +109,6 @@ impl App {
       KeyCode::Delete => {
         self.cache.clear();
         self.history.clear();
-        self.cache.update_loc();
       }
       _ => {}
     }
